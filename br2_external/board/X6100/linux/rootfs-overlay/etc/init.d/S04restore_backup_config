@@ -1,0 +1,36 @@
+#!/bin/sh
+#
+# Restore and backup configs
+#
+
+set -e
+
+BACKUP_PATH="/mnt/backups/backup.tgz"
+BACKUP_DIR=$(dirname ${BACKUP_PATH})
+
+backup() {
+  if [[ ! -d ${BACKUP_DIR} ]] then
+    mkdir -p ${BACKUP_DIR}
+  fi
+  tar c -avf ${BACKUP_PATH} /etc/NetworkManager/system-connections/* /etc/ssh/*_key* /root/.ssh/*
+}
+
+restore() {
+  if [[ -f ${BACKUP_PATH} ]] then
+    tar x -avf ${BACKUP_PATH} -C /
+  fi
+}
+
+case "$1" in
+  start)
+    restore
+    ;;
+  stop)
+    backup
+    ;;
+  *)
+    echo "Usage: $0 {start|stop}"
+    exit 1
+esac
+
+exit $?
